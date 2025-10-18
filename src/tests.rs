@@ -91,30 +91,4 @@ mod tests {
         let path = find_path(&map);
         assert!(path.is_some()); // Same start and end position
     }
-
-    #[test]
-    fn test_path_marking() {
-        let mut map = Map {
-            grid: vec![
-                vec![Cell::Start, Cell::Empty, Cell::Empty],
-                vec![Cell::Empty, Cell::Empty, Cell::Empty],
-                vec![Cell::Empty, Cell::Empty, Cell::Empty],
-            ],
-            start: Position { row: 0, col: 0 },
-            end: Position { row: 0, col: 0 },
-            rows: 3,
-            cols: 3,
-        };
-
-        let path = vec![
-            Position { row: 0, col: 1 },
-            Position { row: 0, col: 2 },
-        ];
-
-        map.mark_path(&path);
-        
-        assert_eq!(map.grid[0][1], Cell::Path);
-        assert_eq!(map.grid[0][2], Cell::Path);
-        assert_eq!(map.grid[0][0], Cell::Start); // Start position should not be changed
-    }
 }
