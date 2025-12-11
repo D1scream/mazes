@@ -1,14 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use uuid::Uuid;
-
-#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
-pub struct Maze {
-    pub id: Option<Uuid>,
-    pub name: String,
-    pub content: String,
-    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateMazeRequest {
@@ -16,7 +7,7 @@ pub struct CreateMazeRequest {
     pub content: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MazeResponse {
     pub id: Uuid,
     pub name: String,
@@ -39,3 +30,7 @@ pub struct MazeSolutionResponse {
     pub solution: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ErrorResponse {
+    pub message: String,
+}

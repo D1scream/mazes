@@ -105,7 +105,7 @@ The server will start on `http://0.0.0.0:3000`
 
 ## Environment Variables
 
-- `DATABASE_URL` - Database URL (default: `postgresql://postgres:postgres@localhost/pacwoman`)
+- `DATABASE_URL` - Database URL (default: `postgresql://postgres:postgres@localhost/mazes`)
 
 ## Testing
 

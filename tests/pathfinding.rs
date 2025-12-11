@@ -1,4 +1,4 @@
-use pacwoman::{Map, Position, Cell, find_path};
+use mazes::{Map, Position, Cell, find_path};
 
 #[test]
 fn test_path_finding() {
