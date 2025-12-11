@@ -1,4 +1,4 @@
-# Pacwoman Web Server
+# Web Server
 
 A REST API server built with Axum for solving maze pathfinding problems.
 
