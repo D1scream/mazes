@@ -25,11 +25,21 @@ pub struct Map {
 }
 
 impl Map {
+    pub fn parse_from_string(content: &str) -> Result<Self, String> {
+        let lines: Vec<String> = content.lines().map(|s| s.to_string()).collect();
+        Self::parse_from_lines(lines)
+    }
+
     pub fn parse_from_stdin() -> Result<Self, String> { 
         let stdin = io::stdin();
         let lines: Vec<String> = stdin.lock().lines()
             .collect::<Result<Vec<_>, _>>()
             .map_err(|e| format!("Error reading input: {}", e))?;
+        
+        Self::parse_from_lines(lines)
+    }
+
+    fn parse_from_lines(lines: Vec<String>) -> Result<Self, String> {
 
         if lines.is_empty() {
             return Err("Empty input".to_string());

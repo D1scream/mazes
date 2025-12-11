@@ -1,5 +1,5 @@
 use std::collections::{VecDeque, HashSet, HashMap};
-use crate::map::{Map, Position};
+use crate::domain::map::{Map, Position};
 
 pub fn find_path(map: &Map) -> Option<Vec<Position>> {
     let mut queue = VecDeque::new();

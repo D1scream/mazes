@@ -1,8 +1,6 @@
-pub mod map;
-pub mod pathfinding;
+pub mod domain;
+pub mod handlers;
+pub mod db;
+pub mod entities;
 
-#[cfg(test)]
-mod tests;
-
-pub use map::{Cell, Map, Position};
-pub use pathfinding::find_path;
+pub use domain::{Cell, Map, Position, find_path};
