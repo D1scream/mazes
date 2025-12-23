@@ -15,7 +15,16 @@ Uses PostgreSQL database. Migrations are located in `migrations/`.
 
 ### Running Migrations
 
-Migrations are applied automatically when the server starts via sqlx.
+Migrations are applied automatically when the server starts. The server will:
+1. Connect to the database using `DATABASE_URL` environment variable
+2. Run all pending migrations from the `migrations/` directory
+3. Start the HTTP server
+
+You can also run migrations manually using sqlx-cli:
+```bash
+cargo install sqlx-cli
+sqlx migrate run
+```
 
 ## API Endpoints
 

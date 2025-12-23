@@ -1,47 +1,78 @@
 use crate::entities::MazeResponse;
-use chrono::Utc;
-use std::sync::{Arc, Mutex};
+use sqlx::PgPool;
 use uuid::Uuid;
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct MazeRepository {
-    store: Arc<Mutex<Vec<MazeResponse>>>,
+    pool: PgPool,
 }
 
 impl MazeRepository {
-    pub fn new() -> Self {
-        Self::default()
+    pub fn new(pool: PgPool) -> Self {
+        Self { pool }
     }
 
-    pub fn create(&self, name: &str, content: &str) -> MazeResponse {
-        let maze = MazeResponse {
-            id: Uuid::new_v4(),
-            name: name.to_owned(),
-            content: content.to_owned(),
-            created_at: Utc::now(),
-        };
+    pub async fn create(&self, name: &str, content: &str) -> Result<MazeResponse, sqlx::Error> {
+        let id = Uuid::new_v4();
+        let maze = sqlx::query_as!(
+            MazeResponse,
+            r#"
+            INSERT INTO mazes (id, name, content)
+            VALUES ($1, $2, $3)
+            RETURNING id, name, content, created_at
+            "#,
+            id,
+            name,
+            content
+        )
+        .fetch_one(&self.pool)
+        .await?;
 
-        let mut store = self.store.lock().expect("store poisoned");
-        store.push(maze.clone());
-        maze
+        Ok(maze)
     }
 
-    pub fn get_by_id(&self, id: Uuid) -> Option<MazeResponse> {
-        let store = self.store.lock().expect("store poisoned");
-        store.iter().find(|m| m.id == id).cloned()
+    pub async fn get_by_id(&self, id: Uuid) -> Result<Option<MazeResponse>, sqlx::Error> {
+        let maze = sqlx::query_as!(
+            MazeResponse,
+            r#"
+            SELECT id, name, content, created_at
+            FROM mazes
+            WHERE id = $1
+            "#,
+            id
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(maze)
     }
 
-    pub fn get_all(&self) -> Vec<MazeResponse> {
-        let store = self.store.lock().expect("store poisoned");
-        let mut mazes: Vec<_> = store.iter().cloned().collect();
-        mazes.sort_by(|a, b| b.created_at.cmp(&a.created_at));
-        mazes
+    pub async fn get_all(&self) -> Result<Vec<MazeResponse>, sqlx::Error> {
+        let mazes = sqlx::query_as!(
+            MazeResponse,
+            r#"
+            SELECT id, name, content, created_at
+            FROM mazes
+            ORDER BY created_at DESC
+            "#
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(mazes)
     }
 
-    pub fn delete(&self, id: Uuid) -> bool {
-        let mut store = self.store.lock().expect("store poisoned");
-        let initial_len = store.len();
-        store.retain(|m| m.id != id);
-        store.len() != initial_len
+    pub async fn delete(&self, id: Uuid) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query!(
+            r#"
+            DELETE FROM mazes
+            WHERE id = $1
+            "#,
+            id
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(result.rows_affected() > 0)
     }
 }

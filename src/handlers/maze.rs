@@ -31,6 +31,8 @@ async fn get_maze(
 ) -> ApiResult<MazeResponse> {
     repository
         .get_by_id(id)
+        .await
+        .map_err(|_| AppError::internal("database error"))?
         .map(Json)
         .ok_or_else(|| AppError::not_found("maze not found"))
 }
@@ -38,7 +40,11 @@ async fn get_maze(
 async fn get_all_mazes(
     State(repository): State<MazeRepository>,
 ) -> ApiResult<Vec<MazeResponse>> {
-    Ok(Json(repository.get_all()))
+    repository
+        .get_all()
+        .await
+        .map(Json)
+        .map_err(|_| AppError::internal("database error"))
 }
 
 async fn get_maze_solution(
@@ -48,6 +54,8 @@ async fn get_maze_solution(
 ) -> ApiResult<MazeSolutionResponse> {
     let maze = repository
         .get_by_id(id)
+        .await
+        .map_err(|_| AppError::internal("database error"))?
         .ok_or_else(|| AppError::not_found("maze not found"))?;
 
     let mut map = crate::domain::Map::parse_from_string(&maze.content)
@@ -89,7 +97,12 @@ async fn delete_maze(
     State(repository): State<MazeRepository>,
     Path(id): Path<Uuid>,
 ) -> Result<StatusCode, AppError> {
-    if repository.delete(id) {
+    let deleted = repository
+        .delete(id)
+        .await
+        .map_err(|_| AppError::internal("database error"))?;
+    
+    if deleted {
         Ok(StatusCode::NO_CONTENT)
     } else {
         Err(AppError::not_found("maze not found"))
@@ -103,6 +116,10 @@ async fn create_maze(
     crate::domain::Map::parse_from_string(&request.content)
         .map_err(|e| AppError::bad_request(format!("invalid maze: {}", e)))?;
 
-    Ok(Json(repository.create(&request.name, &request.content)))
+    repository
+        .create(&request.name, &request.content)
+        .await
+        .map(Json)
+        .map_err(|_| AppError::internal("database error"))
 }
 
