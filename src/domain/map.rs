@@ -55,7 +55,22 @@ impl Map {
         let mut start_found = false;
         let mut end_found = false;
 
+        let expected_cols = lines[0].chars().count();
+        if expected_cols == 0 {
+            return Err("Empty row at line 1".to_string());
+        }
+
         for (row, line) in lines.iter().enumerate() {
+            let line_len = line.chars().count();
+            if line_len != expected_cols {
+                return Err(format!(
+                    "Non-rectangular map: line {} has length {}, expected {}",
+                    row + 1,
+                    line_len,
+                    expected_cols
+                ));
+            }
+
             let mut row_cells = Vec::new();
             for (col, ch) in line.chars().enumerate() {
                 let cell = match ch {
@@ -92,7 +107,7 @@ impl Map {
         }
 
         map.rows = map.grid.len();
-        map.cols = map.grid[0].len();
+        map.cols = expected_cols;
 
         Ok(map)
     }

@@ -1,36 +1,11 @@
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+pub mod create_maze_request;
+pub mod error_response;
+pub mod maze_response;
+pub mod maze_solution_request;
+pub mod maze_solution_response;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CreateMazeRequest {
-    pub name: String,
-    pub content: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MazeResponse {
-    pub id: Uuid,
-    pub name: String,
-    pub content: String,
-    pub created_at: chrono::DateTime<chrono::Utc>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct MazeSolutionRequest {
-    pub player_row: usize,
-    pub player_col: usize,
-    pub portal_row: usize,
-    pub portal_col: usize,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct MazeSolutionResponse {
-    pub id: Uuid,
-    pub name: String,
-    pub solution: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ErrorResponse {
-    pub message: String,
-}
+pub use create_maze_request::CreateMazeRequest;
+pub use error_response::ErrorResponse;
+pub use maze_response::MazeResponse;
+pub use maze_solution_request::MazeSolutionRequest;
+pub use maze_solution_response::MazeSolutionResponse;

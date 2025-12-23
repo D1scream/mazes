@@ -9,12 +9,11 @@ use uuid::Uuid;
 
 use crate::{
     db::MazeRepository,
-    entities::{
-        CreateMazeRequest, ErrorResponse, MazeResponse, MazeSolutionRequest, MazeSolutionResponse,
-    },
+    entities::{CreateMazeRequest, MazeResponse, MazeSolutionRequest, MazeSolutionResponse},
+    errors::AppError,
 };
 
-type ApiResult<T> = Result<Json<T>, ApiError>;
+type ApiResult<T> = Result<Json<T>, AppError>;
 
 pub fn create_router(repository: MazeRepository) -> Router {
     Router::new()
@@ -26,44 +25,20 @@ pub fn create_router(repository: MazeRepository) -> Router {
         .with_state(repository)
 }
 
-struct ApiError {
-    status: StatusCode,
-    message: String,
-}
-
-impl ApiError {
-    fn new(status: StatusCode, message: impl Into<String>) -> Self {
-        Self {
-            status,
-            message: message.into(),
-        }
-    }
-}
-
-impl IntoResponse for ApiError {
-    fn into_response(self) -> axum::response::Response {
-        let body = Json(ErrorResponse {
-            message: self.message,
-        });
-        (self.status, body).into_response()
-    }
-}
-
 async fn get_maze(
     State(repository): State<MazeRepository>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<MazeResponse> {
     repository
         .get_by_id(id)
-        .await
         .map(Json)
-        .ok_or_else(|| ApiError::new(StatusCode::NOT_FOUND, "maze not found"))
+        .ok_or_else(|| AppError::not_found("maze not found"))
 }
 
 async fn get_all_mazes(
     State(repository): State<MazeRepository>,
 ) -> ApiResult<Vec<MazeResponse>> {
-    Ok(Json(repository.get_all().await))
+    Ok(Json(repository.get_all()))
 }
 
 async fn get_maze_solution(
@@ -73,11 +48,10 @@ async fn get_maze_solution(
 ) -> ApiResult<MazeSolutionResponse> {
     let maze = repository
         .get_by_id(id)
-        .await
-        .ok_or_else(|| ApiError::new(StatusCode::NOT_FOUND, "maze not found"))?;
+        .ok_or_else(|| AppError::not_found("maze not found"))?;
 
     let mut map = crate::domain::Map::parse_from_string(&maze.content)
-        .map_err(|e| ApiError::new(StatusCode::BAD_REQUEST, format!("invalid maze: {}", e)))?;
+        .map_err(|e| AppError::bad_request(format!("invalid maze: {}", e)))?;
 
     let player_pos = crate::domain::Position {
         row: request.player_row,
@@ -89,23 +63,17 @@ async fn get_maze_solution(
     };
 
     if player_pos.row >= map.rows || player_pos.col >= map.cols {
-        return Err(ApiError::new(
-            StatusCode::BAD_REQUEST,
-            "invalid player coordinates",
-        ));
+        return Err(AppError::bad_request("invalid player coordinates"));
     }
     if portal_pos.row >= map.rows || portal_pos.col >= map.cols {
-        return Err(ApiError::new(
-            StatusCode::BAD_REQUEST,
-            "invalid portal coordinates",
-        ));
+        return Err(AppError::bad_request("invalid portal coordinates"));
     }
 
     map.start = player_pos;
     map.end = portal_pos;
 
     let path = crate::domain::find_path(&map)
-        .ok_or_else(|| ApiError::new(StatusCode::BAD_REQUEST, "no path found"))?;
+        .ok_or_else(|| AppError::bad_request("no path found"))?;
 
     map.mark_path(&path);
     let solution = map.to_string();
@@ -120,11 +88,11 @@ async fn get_maze_solution(
 async fn delete_maze(
     State(repository): State<MazeRepository>,
     Path(id): Path<Uuid>,
-) -> Result<StatusCode, ApiError> {
-    if repository.delete(id).await {
+) -> Result<StatusCode, AppError> {
+    if repository.delete(id) {
         Ok(StatusCode::NO_CONTENT)
     } else {
-        Err(ApiError::new(StatusCode::NOT_FOUND, "maze not found"))
+        Err(AppError::not_found("maze not found"))
     }
 }
 
@@ -133,8 +101,8 @@ async fn create_maze(
     Json(request): Json<CreateMazeRequest>,
 ) -> ApiResult<MazeResponse> {
     crate::domain::Map::parse_from_string(&request.content)
-        .map_err(|e| ApiError::new(StatusCode::BAD_REQUEST, format!("invalid maze: {}", e)))?;
+        .map_err(|e| AppError::bad_request(format!("invalid maze: {}", e)))?;
 
-    Ok(Json(repository.create(&request.name, &request.content).await))
+    Ok(Json(repository.create(&request.name, &request.content)))
 }
 
