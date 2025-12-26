@@ -43,4 +43,4 @@ git log --show-signature
 
 Должно быть: `gpg: Good signature`
 
-тест gpg 2
+тест gpg 3
