@@ -26,7 +26,7 @@ gpg --list-secret-keys --keyid-format LONG
 gpg --armor --export YOUR_KEY_ID
 ```
 
-## 5. Настроить Git
+## 4. Настроить Git
 
 ```bash
 git config --global user.signingkey YOUR_KEY_ID
@@ -42,3 +42,5 @@ git log --show-signature
 ```
 
 Должно быть: `gpg: Good signature`
+
+тест gpg 1
