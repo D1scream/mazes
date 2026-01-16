@@ -2,13 +2,6 @@
 
 A REST API server built with Axum for solving maze pathfinding problems.
 
-## Architecture
-
-- **Handlers** (`src/handlers/`) - HTTP request handling
-- **DB** (`src/db/`) - database operations
-- **Domain** (`src/domain/`) - domain logic (maps, pathfinding)
-- **Entities** (`src/entities/`) - data models
-
 ## Database
 
 Uses PostgreSQL database. Migrations are located in `migrations/`.

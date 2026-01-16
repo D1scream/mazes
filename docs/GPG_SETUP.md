@@ -31,6 +31,7 @@ gpg --armor --export YOUR_KEY_ID
 ```bash
 git config --global user.signingkey YOUR_KEY_ID
 git config --global commit.gpgsign true
+git config --global user.email "sorento_alba@list.ru"
 ```
 
 ---
