@@ -4,14 +4,13 @@ A REST API server built with Axum for solving maze pathfinding problems.
 
 ## Database
 
-Uses PostgreSQL database. Migrations are located in `migrations/`.
+Uses PostgreSQL database.
 
 ### Running Migrations
 
 Migrations are applied automatically when the server starts. The server will:
 1. Connect to the database using `DATABASE_URL` environment variable
 2. Run all pending migrations from the `migrations/` directory
-3. Start the HTTP server
 
 You can also run migrations manually using sqlx-cli:
 ```bash
@@ -22,7 +21,7 @@ sqlx migrate run
 ## API Endpoints
 
 ### POST /api/mazes
-Create a new maze
+Create a new mazeeee
 
 **Request:**
 ```json
